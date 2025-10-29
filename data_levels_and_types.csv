@@ -10,7 +10,7 @@ picture_url,Nominal,string
 host_id,Nominal,integer
 host_url,Nominal,string
 host_name,Nominal,string
-host_since,Nominal,date
+host_since,Ordinal,date
 host_location,Nominal,string
 host_about,Nominal,string
 host_response_time,Interval,string
