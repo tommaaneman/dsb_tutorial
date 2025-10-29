@@ -1,0 +1,154 @@
+@startuml
+title Airbnb Listings ERD
+left to right direction
+hide circle
+skinparam roundcorner 15
+skinparam class {
+  BackgroundColor White
+  BorderColor Black
+}
+
+entity "Host" as Host {
+  * **host_id : long <<PK>>**
+  host_url : url
+  host_name : string
+  host_since : date
+  host_location : string
+  host_about : string
+  host_response_time : string
+  host_response_rate : string
+  host_acceptance_rate : string
+  host_is_superhost : boolean
+  host_thumbnail_url : string
+  host_picture_url : string
+  host_neighbourhood : string
+  host_listings_count : int
+  calculated_host_listings_count : int
+  calculated_host_listings_count_entire_homes : int
+  calculated_host_listings_count_private_rooms : int
+  calculated_host_listings_count_shared_rooms : int
+  host_total_listings_count : int
+  host_has_profile_pic : boolean
+  host_identity_verified : boolean
+}
+
+entity "Listing" as Listing {
+  * **id : long <<PK>>**
+  listing_url : url
+  scrape_id : long
+  last_scraped : date
+  name : string
+  description : text
+  neighborhood_overview : text
+  picture_url : url
+  -- Host & Location --
+  host_id : long <<FK>>
+  neighbourhood_cleansed : string <<FK>>
+  latitude : decimal(9,6)
+  longitude : decimal(9,6)
+  -- Property --
+  property_type : string <<FK>>
+  room_type : string <<FK>>
+  accommodates : int
+  bathrooms : <color:red>**TO DO: NORMALIZE**</color>
+  bathrooms_text : string
+  bedrooms : int
+  beds : int
+  -- Policies & Booking --
+  minimum_nights : int
+  maximum_nights : int
+  minimum_minimum_nights : int
+  maximum_minimum_nights : int
+  minimum_maximum_nights : int
+  maximum_maximum_nights : int
+  minimum_nights_avg_ntm : int
+  maximum_nights_avg_ntm : int
+  instant_bookable : boolean
+  license : string
+  -- Pricing (snapshot) --
+  price : money
+  -- Availability (rolling) --
+  has_availability : boolean
+  calendar_updated : <color:red>**EMPTY**</color>
+  calendar_last_scraped : date
+  availability_30 : int
+  availability_60 : int
+  availability_90 : int
+  availability_365 : int
+  -- Reviews (aggregate) --
+  number_of_reviews : int
+  number_of_reviews_ltm : int
+  number_of_reviews_l30d : int
+  first_review : date
+  last_review : date
+  reviews_per_month : decimal(4,2)
+}
+
+entity "PropertyType" as PropertyType {
+  * **property_type : string <<PK>>**
+}
+
+entity "RoomType" as RoomType {
+  * **room_type : string <<PK>>**
+}
+
+entity "Neighbourhood" as Neighbourhood {
+  * **neighbourhood_cleansed : string <<PK>>**
+  neighbourhood_group_cleansed : string
+}
+
+entity "ReviewScore" as ReviewScore {
+  *listing_id : long <<FK>>
+  review_score_rating : int
+  review_score_accuracy : int
+  review_score_cleanliness : int
+  review_score_checkin : int
+  review_score_communication : int
+  review_score_location : int
+  review_scores_value : int
+}
+
+entity "AmenityType" as Amenity {
+  * **name : string <<PK>>**
+}
+
+entity "ListingAmenity" as ListingAmenity {
+  *listing_id : long <<FK>>
+  *name : string <<FK>>
+}
+
+entity "VerificationType" as VerificationType {
+  * **verification_type : string <<PK>>**
+}
+
+entity "HostVerification" as HostVerification {
+  *host_id : long <<FK>>
+  *verification_type : string <<FK>>
+}
+
+'========================
+' Field-anchored relations
+'========================
+
+' Listing -> Host
+Listing::host_id }o--|| Host::host_id : "belongs to"
+
+' Listing -> Neighbourhood
+Listing::neighbourhood_cleansed }o--|| Neighbourhood::neighbourhood_cleansed : "in"
+
+' Listing (Property group) -> PropertyType & RoomType
+Listing::property_type }o--|| PropertyType::property_type : "is a"
+Listing::room_type }o--|| RoomType::room_type : "is a"
+
+' Listing <-> ReviewScores (1:1 on listing_id)
+ReviewScore::listing_id }o--|| Listing::id : "has"
+
+' Amenities junction
+ListingAmenity::listing_id }o--|| Listing::id
+ListingAmenity::name }o--|| Amenity::name
+
+' Host verifications junction
+HostVerification::host_id }o--|| Host::host_id
+HostVerification::verification_type }o--|| VerificationType::verification_type
+
+@enduml
